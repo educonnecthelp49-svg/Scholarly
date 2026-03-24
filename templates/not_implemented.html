@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Coming Soon{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="alert alert-warning shadow-sm">
+        <h4 class="alert-heading">Feature not yet ported</h4>
+        <p class="mb-2">{{ feature|replace('_', ' ')|title }} hasn't been migrated to the FastAPI stack yet.</p>
+        <p class="mb-0 text-muted">Navigation and URLs are in place; functionality will arrive in the next pass.</p>
+    </div>
+</div>
+{% endblock %}

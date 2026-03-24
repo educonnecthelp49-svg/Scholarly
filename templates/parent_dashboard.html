@@ -1,0 +1,812 @@
+{% extends "base.html" %}
+
+{% block title %}Parent Dashboard - School Social Platform{% endblock %}
+
+{% block content %}
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 fw-bold text-primary">
+                <i class="fas fa-eye me-2"></i>Parent Monitoring Dashboard
+            </h1>
+            <div class="text-muted">
+                <span class="badge bg-info">VIEW-ONLY ACCESS</span>
+                Welcome, {{ user.full_name }}
+            </div>
+        </div>
+        
+        <!-- Children Overview Cards -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-children me-2"></i>Your Children ({{ children|length }})
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if children %}
+                            <div class="row">
+                                {% for child in children %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card border-primary">
+                                        <div class="card-body text-center">
+                                            <div class="avatar-circle mb-3 mx-auto bg-primary text-white" style="width: 60px; height: 60px;">
+                                                <i class="fas fa-user fa-2x"></i>
+                                            </div>
+                                            <h6 class="card-title">{{ child.full_name }}</h6>
+                                            <p class="card-text text-muted small">
+                                                <i class="fas fa-user-graduate me-1"></i>{{ child.grade_level or 'No Grade' }}
+                                                {% if child.house %}
+                                                    <br><i class="fas fa-home me-1"></i>{{ child.house }}
+                                                {% endif %}
+                                            </p>
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <span class="badge bg-secondary">{{ child.posts|length }} Posts</span>
+                                                <span class="badge bg-info">{{ child.sent_messages|length }} Messages</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-user-plus fa-3x mb-3"></i>
+                                <h5>No Children Assigned</h5>
+                                <p>Contact an administrator to assign children to your parent account.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Parent Dashboard Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs" id="parentTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="welcome-tab" data-bs-toggle="tab" data-bs-target="#welcome" type="button" role="tab">
+                                    <i class="fas fa-home me-2"></i>Welcome
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="social-feed-tab" data-bs-toggle="tab" data-bs-target="#social-feed" type="button" role="tab">
+                                    <i class="fas fa-feed me-2"></i>Social Feed
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="child-activity-tab" data-bs-toggle="tab" data-bs-target="#child-activity" type="button" role="tab">
+                                    <i class="fas fa-child me-2"></i>Child Activity
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="parentTabsContent">
+                            <!-- Welcome Tab -->
+                            <div class="tab-pane fade show active" id="welcome" role="tabpanel">
+                                <div class="text-center py-5">
+                                    <div class="welcome-icon mb-4">
+                                        <i class="fas fa-user-friends fa-4x text-primary"></i>
+                                    </div>
+                                    <h2 class="text-primary mb-4">Hello Parent!</h2>
+                                    <p class="lead mb-4">Welcome to your child monitoring dashboard. Here you can keep track of your children's school activities and social interactions.</p>
+                                    
+                                    <div class="row justify-content-center">
+                                        <div class="col-md-8">
+                                            <div class="guidelines-card p-4 bg-light rounded">
+                                                <h5 class="text-primary mb-3">
+                                                    <i class="fas fa-info-circle me-2"></i>Parent Guidelines
+                                                </h5>
+                                                <ul class="list-unstyled text-start">
+                                                    <li class="mb-2">
+                                                        <i class="fas fa-check text-success me-2"></i>
+                                                        <strong>Social Feed:</strong> View all school posts in read-only mode
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        <i class="fas fa-check text-success me-2"></i>
+                                                        <strong>Child Activity:</strong> Monitor your children's posts, engagement, and statistics
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        <i class="fas fa-times text-danger me-2"></i>
+                                                        <strong>Restrictions:</strong> Cannot post, comment, or message (monitoring only)
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        <i class="fas fa-shield-alt text-info me-2"></i>
+                                                        <strong>Privacy:</strong> Your monitoring activities are not visible to students
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <button class="btn btn-primary btn-lg me-2" onclick="showTab('social-feed')">
+                                            <i class="fas fa-feed me-2"></i>View Social Feed
+                                        </button>
+                                        <button class="btn btn-success btn-lg" onclick="showTab('child-activity')">
+                                            <i class="fas fa-child me-2"></i>Monitor Child Activity
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Social Feed Tab -->
+                            <div class="tab-pane fade" id="social-feed" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4><i class="fas fa-feed me-2"></i>School Social Feed (Read Only)</h4>
+                                    <span class="badge bg-warning text-dark">VIEW ONLY</span>
+                                </div>
+                                
+                                <div style="max-height: 600px; overflow-y: auto;">
+                                    {% if children_posts %}
+                                        {% for post in children_posts %}
+                                        <div class="border-bottom pb-3 mb-3 post-item">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar-circle me-3 bg-primary">
+                                                    <i class="fas fa-user text-white"></i>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <div>
+                                                            <strong class="text-primary">{{ post.author.full_name }}</strong>
+                                                            {% if post.author in children %}
+                                                                <span class="badge bg-success ms-2">Your Child</span>
+                                                            {% endif %}
+                                                            <br>
+                                                            <small class="text-muted">
+                                                                <i class="fas fa-clock me-1"></i>
+                                                                {{ post.date_posted.strftime('%B %d, %Y at %I:%M %p') }}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="post-content mb-3">
+                                                <p class="mb-0">{{ post.content }}</p>
+                                            </div>
+                                            <div class="post-actions d-flex justify-content-between align-items-center">
+                                                <div class="engagement-stats">
+                                                    <span class="badge bg-danger me-2">
+                                                        <i class="fas fa-heart me-1"></i>{{ post.like_count }} likes
+                                                    </span>
+                                                    <span class="badge bg-info">
+                                                        <i class="fas fa-comment me-1"></i>{{ post.comment_count }} comments
+                                                    </span>
+                                                </div>
+                                                <small class="text-muted">Read-only view</small>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-center text-muted py-5">
+                                            <i class="fas fa-comments fa-3x mb-3"></i>
+                                            <h5>No Recent Posts</h5>
+                                            <p>There are no recent posts from students.</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Child Activity Tab -->
+                            <div class="tab-pane fade" id="child-activity" role="tabpanel">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <h4><i class="fas fa-child me-2"></i>Child Activity Monitoring</h4>
+                                    <span class="badge bg-info">{{ children|length }} Child(ren) Assigned</span>
+                                </div>
+                                
+                                {% if children %}
+                                    <!-- Main Activity Graph - Large and Centered -->
+                                    <div class="row mb-4">
+                                        <div class="col-12">
+                                            <div class="card shadow">
+                                                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                                    <h5 class="mb-0">
+                                                        <i class="fas fa-chart-line me-2"></i>Daily Posting Activity (Last 30 Days) - Real Data
+                                                    </h5>
+                                                    <span class="badge bg-light text-dark">Live Analytics</span>
+                                                </div>
+                                                <div class="card-body p-4">
+                                                    <div style="height: 400px; position: relative; width: 100%;">
+                                                        <canvas id="postingChart" style="display: block; width: 100%; height: 100%;"></canvas>
+                                                    </div>
+                                                    <div class="text-center mt-3">
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-info-circle me-1"></i>
+                                                            This graph shows actual posting activity data from your children over the past 30 days
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Statistics Cards Row -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <div class="card border-primary">
+                                                <div class="card-body text-center">
+                                                    {% set total_posts = 0 %}
+                                                    {% for child in children %}
+                                                        {% set total_posts = total_posts + child.posts|length %}
+                                                    {% endfor %}
+                                                    <div class="h2 mb-2 text-primary">{{ total_posts }}</div>
+                                                    <h6 class="text-muted mb-0">Total Posts</h6>
+                                                    <small class="text-muted">All children combined</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card border-success">
+                                                <div class="card-body text-center">
+                                                    {% set total_messages = 0 %}
+                                                    {% for child in children %}
+                                                        {% set total_messages = total_messages + child.sent_messages|length %}
+                                                    {% endfor %}
+                                                    <div class="h2 mb-2 text-success">{{ total_messages }}</div>
+                                                    <h6 class="text-muted mb-0">Messages Sent</h6>
+                                                    <small class="text-muted">Direct & group messages</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card border-warning">
+                                                <div class="card-body text-center">
+                                                    {% set total_groups = 0 %}
+                                                    {% for child in children %}
+                                                        {% set total_groups = total_groups + child.groups|length %}
+                                                    {% endfor %}
+                                                    <div class="h2 mb-2 text-warning">{{ total_groups }}</div>
+                                                    <h6 class="text-muted mb-0">Groups Joined</h6>
+                                                    <small class="text-muted">Active group memberships</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Individual Child Cards -->
+                                    <div class="row">
+                                        {% for child in children %}
+                                        <div class="col-lg-6 mb-4">
+                                            <div class="child-activity-card p-4 border rounded shadow-sm">
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="avatar-circle me-3 bg-primary">
+                                                        <i class="fas fa-child text-white"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h5 class="mb-1">{{ child.full_name }}</h5>
+                                                        <small class="text-muted">{{ child.grade_level or 'No Grade Assigned' }}</small>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Activity Stats -->
+                                                <div class="row text-center mb-3">
+                                                    <div class="col-4">
+                                                        <div class="stat-box">
+                                                            <div class="h4 mb-0 text-primary">{{ child.posts|length }}</div>
+                                                            <small class="text-muted">Total Posts</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="stat-box">
+                                                            <div class="h4 mb-0 text-success">{{ child.sent_messages|length }}</div>
+                                                            <small class="text-muted">Messages Sent</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-4">
+                                                        <div class="stat-box">
+                                                            <div class="h4 mb-0 text-warning">{{ child.groups|length }}</div>
+                                                            <small class="text-muted">Groups Joined</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <!-- Recent Posts -->
+                                                <h6 class="text-primary mb-3">Recent Posts</h6>
+                                                <div style="max-height: 200px; overflow-y: auto;">
+                                                    {% for post in child.posts[:3] %}
+                                                    <div class="small-post mb-2 p-2 bg-light rounded">
+                                                        <p class="mb-1 small">{{ post.content|truncate(80) }}</p>
+                                                        <small class="text-muted">
+                                                            <i class="fas fa-clock me-1"></i>
+                                                            {{ post.date_posted.strftime('%b %d, %I:%M %p') }}
+                                                            <span class="ms-2">
+                                                                <i class="fas fa-heart text-danger"></i> {{ post.like_count }}
+                                                                <i class="fas fa-comment ms-1"></i> {{ post.comment_count }}
+                                                            </span>
+                                                        </small>
+                                                    </div>
+                                                    {% else %}
+                                                    <p class="text-muted small">No recent posts</p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="text-center text-muted py-5">
+                                        <i class="fas fa-child fa-3x mb-3"></i>
+                                        <h5>No Children Assigned</h5>
+                                        <p>Contact an administrator to assign children to your parent account for monitoring.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Homework and Assignments -->
+        {% if children_homework %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-book me-2"></i>Upcoming Homework & Assignments
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Due Date</th>
+                                        <th>Grade Level</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for homework in children_homework %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-primary">{{ homework.subject }}</span>
+                                        </td>
+                                        <td>
+                                            <strong>{{ homework.title }}</strong>
+                                        </td>
+                                        <td>{{ homework.description|truncate(80) }}</td>
+                                        <td>
+                                            <span class="badge bg-warning text-dark">
+                                                {{ homework.due_date.strftime('%b %d, %Y') }}
+                                            </span>
+                                        </td>
+                                        <td>{{ homework.grade_level }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+
+        
+
+    </div>
+</div>
+
+<script>
+// Tab switching function
+function showTab(tabId) {
+    const tabElement = document.getElementById(tabId + '-tab');
+    const tab = new bootstrap.Tab(tabElement);
+    tab.show();
+    
+    // If switching to child activity tab, load the chart
+    if (tabId === 'child-activity') {
+        setTimeout(loadActivityChart, 200);
+    }
+}
+
+let chartInstance = null;
+
+// Load activity chart function with improved error handling and visual feedback
+function loadActivityChart() {
+    {% if children %}
+    const chartCanvas = document.getElementById('postingChart');
+    if (!chartCanvas) return;
+    
+    // Show loading indicator
+    const cardBody = chartCanvas.closest('.card-body');
+    const loadingDiv = document.createElement('div');
+    loadingDiv.innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x text-primary"></i><br><small class="text-muted mt-2">Loading activity data...</small></div>';
+    loadingDiv.id = 'chart-loading';
+    
+    // Destroy existing chart if it exists
+    if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
+    }
+    
+    const ctx = chartCanvas.getContext('2d');
+    const datasets = [];
+    let loadedCount = 0;
+    const totalChildren = {{ children|length }};
+    let allLabels = [];
+    
+    {% for child in children %}
+    fetch(`/api/child_activity_data/{{ child.id }}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('HTTP error! status: ' + response.status);
+            }
+            return response.json();
+        })
+        .then(data => {
+            const color = getRandomColor({{ loop.index0 }});
+            
+            // Enhanced dataset configuration
+            datasets.push({
+                label: '{{ child.full_name }}',
+                data: data.data,
+                borderColor: color,
+                backgroundColor: color + '20',
+                tension: 0.4,
+                fill: false,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+                pointBackgroundColor: color,
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                borderWidth: 3,
+                pointHoverBackgroundColor: color,
+                pointHoverBorderColor: '#ffffff',
+                pointHoverBorderWidth: 2
+            });
+            
+            // Store labels from first successful response
+            if (allLabels.length === 0) {
+                allLabels = data.labels;
+            }
+            
+            loadedCount++;
+            if (loadedCount === totalChildren) {
+                // Remove loading indicator
+                const loadingEl = document.getElementById('chart-loading');
+                if (loadingEl) loadingEl.remove();
+                
+                if (datasets.length > 0) {
+                    chartInstance = createChart(ctx, allLabels, datasets);
+                } else {
+                    // Show no data message
+                    showNoDataMessage(cardBody);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error loading child activity data for {{ child.full_name }}:', error);
+            loadedCount++;
+            
+            if (loadedCount === totalChildren) {
+                // Remove loading indicator
+                const loadingEl = document.getElementById('chart-loading');
+                if (loadingEl) loadingEl.remove();
+                
+                if (datasets.length > 0) {
+                    chartInstance = createChart(ctx, allLabels, datasets);
+                } else {
+                    // Show error message
+                    showErrorMessage(cardBody);
+                }
+            }
+        });
+    {% endfor %}
+    
+    // Add loading indicator after a small delay to prevent flicker
+    setTimeout(() => {
+        if (loadedCount < totalChildren && !chartInstance) {
+            cardBody.appendChild(loadingDiv);
+        }
+    }, 100);
+    {% endif %}
+}
+
+// Helper function to show no data message
+function showNoDataMessage(container) {
+    container.innerHTML = `
+        <div class="text-center p-5">
+            <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No Activity Data Available</h5>
+            <p class="text-muted">Your children haven't posted any content in the last 30 days, or activity tracking data is still being collected.</p>
+            <small class="text-info">
+                <i class="fas fa-info-circle me-1"></i>
+                Data appears here once your children start posting content on the platform.
+            </small>
+        </div>
+    `;
+}
+
+// Helper function to show error message
+function showErrorMessage(container) {
+    container.innerHTML = `
+        <div class="text-center p-5">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h5 class="text-warning">Unable to Load Activity Data</h5>
+            <p class="text-muted">There was an issue loading the activity chart. Please refresh the page or try again later.</p>
+            <button class="btn btn-primary btn-sm" onclick="loadActivityChart()">
+                <i class="fas fa-redo me-1"></i>Try Again
+            </button>
+        </div>
+    `;
+}
+
+// Initialize chart when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-load chart if already on child activity tab
+    const childActivityTab = document.getElementById('child-activity');
+    if (childActivityTab && childActivityTab.classList.contains('active')) {
+        setTimeout(loadActivityChart, 500);
+    }
+
+    // Also load chart when tab is clicked
+    const childActivityTabButton = document.getElementById('child-activity-tab');
+    if (childActivityTabButton) {
+        childActivityTabButton.addEventListener('click', function() {
+            setTimeout(loadActivityChart, 300);
+        });
+    }
+});
+
+function getRandomColor(index) {
+    const colors = [
+        '#3B82F6', // Blue
+        '#10B981', // Green  
+        '#F59E0B', // Yellow
+        '#EF4444', // Red
+        '#8B5CF6', // Purple
+        '#06B6D4', // Cyan
+        '#F97316', // Orange
+        '#84CC16'  // Lime
+    ];
+    return colors[index % colors.length];
+}
+
+function createChart(ctx, labels, datasets) {
+    return new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: {
+                duration: 1000,
+                easing: 'easeInOutQuart'
+            },
+            plugins: {
+                title: {
+                    display: false // We show the title in the card header
+                },
+                legend: {
+                    display: datasets.length > 1,
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: '#198754',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: function(tooltipItems) {
+                            return 'Date: ' + tooltipItems[0].label;
+                        },
+                        label: function(context) {
+                            const count = context.parsed.y;
+                            return context.dataset.label + ': ' + count + ' post' + (count !== 1 ? 's' : '');
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1,
+                        font: {
+                            size: 12
+                        },
+                        callback: function(value) {
+                            if (Number.isInteger(value)) {
+                                return value;
+                            }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Number of Posts',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#495057'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        drawBorder: false
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxTicksLimit: 10,
+                        font: {
+                            size: 11
+                        },
+                        maxRotation: 45,
+                        minRotation: 0
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date (Last 30 Days)',
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        color: '#495057'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)',
+                        drawBorder: false
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #6c757d;
+    color: white;
+}
+
+.post-item {
+    transition: all 0.3s ease;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.post-item:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.child-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.child-activity-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    border: 2px solid #e9ecef !important;
+    transition: all 0.3s ease;
+}
+
+.child-activity-card:hover {
+    border-color: #007bff !important;
+    box-shadow: 0 4px 15px rgba(0,123,255,0.15) !important;
+}
+
+.small-post {
+    border-left: 3px solid #007bff;
+}
+
+.welcome-icon {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.guidelines-card {
+    border-left: 4px solid #007bff;
+    animation: slideInUp 0.8s ease-out;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+    border: none;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: transparent;
+    border-color: #007bff;
+    color: #007bff;
+    font-weight: 600;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-box {
+    text-align: center;
+}
+
+.message-item {
+    transition: all 0.3s ease;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.message-item:hover {
+    background: #e9ecef;
+}
+
+.tab-content {
+    min-height: 400px;
+}
+
+.nav-tabs .nav-link {
+    color: #495057;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+</style>
+{% endblock %}
